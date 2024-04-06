@@ -1,0 +1,35 @@
+# 水平单库分表配置
+spring:
+  shardingsphere:
+    datasource:
+      names: m1 # 数据源名称列表
+      m1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/csy_test?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=Asia/Shanghai&useSSL=false
+        username: root
+        password: 123456
+    sharding:
+      tables:
+        tm_phone:
+          actualDataNodes: m1.tm_phone_$->{1..100} # 实际的数据节点
+          tableStrategy:
+            inline:
+              sharding-column: phone # 分片键
+              algorithm-expression: tm_phone_$->{phone % 100 + 1} # 分片算法表达式
+          keyGenerator:
+            type: SNOWFLAKE # 分布式主键生成策略
+            column: phone # 分布式主键生成列
+  #    props:
+  #      sql:
+  #        show: true # 是否显示SQL语句，注意这并非ShardingSphere的标准配置，而是用于调试目的
+  jpa:
+    hibernate:
+      ddl-auto: update # 这里设置为update来自动更新数据库结构，或者create来创建新表
+    show-sql: true # 显示执行的SQL语句
+
+
+server:
+  port: 8081
+
+
